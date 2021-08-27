@@ -1,0 +1,263 @@
+/**
+ * Stuff TODO: name
+ */
+// not sure yet if there's anything like a main function
+// this is in a c file only for the comments the language isn't like c
+
+// new preprocessor instructions for some language behavior
+// also preprocessor is still the same language for the most part just with some different features
+
+// preprocessor syntax
+# // preprocessor line
+#{
+	// preprocessor block
+}
+
+#autotypecast standard // none, standard, related, all (obviously the default is standard)
+// none completely removes implicit typecasting, even when doing basic things such as setting variables.
+// related does things like converting number types, and chars/strings. if you do things such as adding different number types, it typecasts to the more accurate variant, and chars can be treated as length 1 strings
+// there might also be some stuff for std classes
+// all has the same rules as related but numbers can be concatenated to strings and such (works like javascript). arrays can also be turned into strings, and whatever makes sense for any std stuff (TODO)
+// increasing the amount of autotypecasting can help for making code shorter, while reducing it can make projects cleaner. the default option is up to the compiler but should fit the situation
+
+#
+
+// TODO: preprocessor optimization lines and pointer safe mode for scopes
+
+
+// somewhat java style import system
+import std::String; // import std::String
+import std.String; // import std::String as "String" (namespace doesn't need to be specified)
+import std::Map;
+
+// imports are scoped to that file, for example if A contains "import B", and B contains "import C", A does not have access to C
+// to make collections of imports, use #include
+// std should include all the things programs need, and abstract away operating system specific things, similar to SDL and Java
+
+
+/**
+ * values
+ */
+
+// Void has 0 size
+
+// arrays and maps use [] for setting contents, maps use : to seperate keys and values
+:: Int[3] intArray = [0, 1, 2,]; // note that trailing comma is valid
+:: std::Map<std::String, std::String> stringMap = ["zero": "a", "one": "b",]; // note that trailing comma is valid
+// all types are capitalized, and everything is a class
+// the class thing shouldn't impact performance in any way, it just gives more consistant syntax
+// type keywords like auto aren't capitalized because they aren't the actual types
+// :: is used for defining variables in most cases
+
+:: Int num = 3;
+//Int *pointer = &num; // invalid
+:: Int* pointer = num&; // valid
+:: Int* pointer2* = num; // same value set, not same location. space is allocated automatically
+// note that getting pointer values is pointer* not *pointer
+// in general prefix operations are avoided to prevent requiring parenthesis
+// this pointer setup allows you to do things like pointer*[3] easily
+// all things relating to variable type ACUTALLY go on the type, anything to change how it's set goes on the variable itself
+
+:: Void() functionExample1 = {
+	// this is a valid way to write a function
+	// functions are pointers like arrays, running them just calls the address and does whatever variable stuff for the params
+	// because of this functions are variables and can be used as them
+	// TODO: figure out how scoping this works
+};
+:: Void() functionExample2() = {
+	// this is also valid
+};
+:: Void(const int x, int* y) functionExample3 = {
+	// above with parameters
+};
+:: Void functionExample3(const int x, int* y) {
+	// normal function syntax
+};
+
+:: Void()[2] funcArray = [
+	{
+		// function 1
+	},
+	{
+		// function 2
+	},
+];
+
+// note that due to these function changes, functions are not const by default. this isn't an issue in practice though since compilers will just optimize it in general use cases
+// manipulating the actual function code isn't useful, but the pointer can be changed to point to a different function
+// TODO: changes to lambdas and std::function and such
+
+/**
+ * loops
+ */
+
+// new keywords back; and restart;
+// break exits to the end of the loop instantly.
+for (:: Int i = 0; i < 5; i++) {
+	if (i == 3)
+		break;
+	puts(i);
+}
+// 0 1 2
+// continue skips the rest of the code in the current iteration of the loop, starting the next iteration
+for (:: Int i = 0; i < 5; i++) {
+	if (i == 3)
+		continue;
+	puts(i);
+}
+// 0 1 2 4
+// back jumps to the start of the code block, doesn't start next iteration
+for (:: Int i = 0; i < 5; i++) {
+	puts(i);
+	if (i == 3)
+		back;
+}
+// 0 1 2 3 3 3 3 3 3 3 3 3...
+// restart does the loop over again entirely (acts the same as back in while loop)
+for (:: Int i = 0; i < 5; i++) {
+	puts(i);
+	if (i == 3)
+		restart;
+}
+// 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3...
+
+
+
+// expanded for loop
+
+do (:: Int i = 0) {
+	// i is in the current scope, condition has not been checked yet
+} for (i < 10; i++) {
+	// condition has now been checked, i will increment when this block completes
+}
+
+// expanded while loop
+
+do (:: Int i = 0) {
+	// i is in the current scope, condition has not been checked yet
+} while (i < 10) {
+	// this is like the expanded for loop, just without the increment instruction
+	i++;
+}
+
+// do loop: not even a loop but allows loop keywords and initializer
+do (:: Int i = 0) {
+	// i is in scope, and won't be erased when back is used
+	// restart and break can also be used
+	// continue can't be used because this doesn't loop
+	back;
+}; // semicolon is neccecary because otherwise it would look for a for/while
+
+
+
+// string concatenation with +
+"bean" + '\n' + "time";
+// adapts to whatever situation
+// two constant strings next to eachother without an operator adds a line break, allowing multiline strings to be written cleaner
+"bean"
+"time";
+// note that this is also written without a \ at the end, linebreaks are ignored like all other whitespace, so using \ at the end of a line will just cause a syntax error
+// the only things linebreaks affect is comments and preprocessor
+
+
+// try catch isn't annoying anymore, it handles blocks normally
+try {
+	stuff();
+} // catches anything as an unnamed parameter, and does nothing
+
+try {
+	stuff();
+} catch (Bean); // also does nothing, named parameters should give a warning
+
+try {
+	stuff();
+} catch { // again, catches anything as an unnamed parameter
+	otherStuff();
+}
+
+try
+	stuff();
+catch () // this is required because there's no code block, but can still be left empty to catch anything as unnamed parameter
+	otherStuff();
+
+try stuff(); // catches literally everything, terrible programming practice but a convenient one-liner
+try stuff(); catch (Bean); // convenient one-liner
+
+try stuff(); finally unstuff(); // finally can be done without catch, and also doesn't need an explicit code block
+
+// any amount of catches can be used, they take priority from first to last
+try
+	stuff();
+catch (Bean)
+	beanStuff();
+catch (Time)
+	timeStuff();
+catch ()
+	otherStuff();
+finally
+	unstuff();
+
+// default arguments anywhere
+:: Void defArgAnywhere(Int first = 0, Int second) {}
+defArgAnywhere(, 3);
+// default arguments from other arguments (note that definitions are NOT required to be in order in this case)
+:: Void defArgAnywhere(Int first = second, Int second) {}
+defArgAnywhere(, 3);
+
+// type is the class/struct system
+// default access specifier is public
+// type keyword creates a const Type
+type IntVector2 {
+	constructor() {} // constructor is a keyword
+	constructor(Int x, Int y = x) {
+		this->x = x;
+		this->y = y;
+	}
+
+	. Int x, y; // starting with . creates a member variable
+
+	:: IntVector2 unit = IntVector2(1); // this is the same as a static class variable in c++
+}
+
+type IntVector2 {
+	. Int x, y; // starting with . creates a member variable
+
+	:: IntVector2 unit = IntVector2(1); // this is the same as a static class variable in c++
+}
+
+:: Union<Int, Float> UnionExample1; // unions are just a way of allowing multiple types to be used for the same data, they allocate the space for the largest type
+:: Union<Int, Float> UnionExample2[Int] = 3;
+
+enum EnumExample { // enums are names for integers,
+	zero, // starts at 0
+	one, // increments by 1 each item
+	two,
+	three,
+	five = 5, // numbers can be set explicitly, enums can be signed or unsigned
+	six, // still increments by one after explicitly setting
+	seven, // trailing comma is allowed
+}
+:: EnumExample enumExample = EnumExample::five;
+// arithmetic can't be done on enums without casting because whether they're signed or what their size is depends on the architecture
+
+bit enum BitEnumExample { // bit flag enum, leftshifts instead of incrementing
+	one, // starts at one
+	two,
+	four,
+	ten = 0b1010, // still can be explicitly set
+	twenty,
+	fourty,
+	// this does not support negative numbers
+}
+
+namespace demo { // namespaces are things to group variables
+	:: Int x = 3;
+	:: Float y = 7.2;
+
+	Void setX(Int value) {
+		x = value; // namespaces can access their own contents without the prefix
+	}
+
+	// TODO: should namespaces have access specifiers?
+}
+demo::y = 3.2;
